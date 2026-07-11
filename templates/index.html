@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A premium real-time dashboard tracking the latest Google Cloud BigQuery releases and updates, with quick Twitter sharing capabilities.">
+    <title>BigQuery Release Notes Radar</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Link Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dark-theme">
+    <div class="background-decorations">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-container">
+                    <svg viewBox="0 0 24 24" width="32" height="32" class="brand-logo">
+                        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>BigQuery Release Notes</h1>
+                    <span class="subtitle">Live Broadcast Radar</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="last-updated-badge" id="last-updated-badge">
+                    <span class="status-indicator active"></span>
+                    <span class="time-text">Checking feed...</span>
+                </div>
+                <button id="refresh-btn" class="btn btn-primary" aria-label="Refresh Release Notes">
+                    <svg viewBox="0 0 24 24" width="18" height="18" class="icon-refresh">
+                        <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    </svg>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Panel -->
+        <section class="stats-panel" id="stats-panel">
+            <div class="stat-card" data-filter="All">
+                <div class="stat-icon all-icon">📋</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-total">0</span>
+                    <span class="stat-label">Total Updates</span>
+                </div>
+            </div>
+            <div class="stat-card" data-filter="Feature">
+                <div class="stat-icon feature-icon">✨</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-features">0</span>
+                    <span class="stat-label">Features</span>
+                </div>
+            </div>
+            <div class="stat-card" data-filter="Change">
+                <div class="stat-icon change-icon">🔄</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-changes">0</span>
+                    <span class="stat-label">Changes</span>
+                </div>
+            </div>
+            <div class="stat-card" data-filter="Deprecation">
+                <div class="stat-icon deprecation-icon">⚠️</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-deprecations">0</span>
+                    <span class="stat-label">Deprecations</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Filter and Search Bar -->
+            <section class="controls-bar">
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" width="20" height="20" class="search-icon">
+                        <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search updates, keywords, or dates..." aria-label="Search release notes">
+                </div>
+                
+                <div class="filter-group" id="filter-group">
+                    <button class="filter-btn active" data-type="all">All</button>
+                    <button class="filter-btn" data-type="feature">Features</button>
+                    <button class="filter-btn" data-type="change">Changes</button>
+                    <button class="filter-btn" data-type="deprecation">Deprecations</button>
+                </div>
+            </section>
+
+            <!-- Release Notes List -->
+            <section class="notes-section">
+                <!-- Loading State -->
+                <div class="loading-state" id="loading-state">
+                    <div class="spinner-outer">
+                        <div class="spinner-inner"></div>
+                    </div>
+                    <p>Scanning BigQuery Release Feed...</p>
+                </div>
+
+                <!-- Error State -->
+                <div class="error-state hidden" id="error-state">
+                    <div class="error-icon">❌</div>
+                    <h3>Failed to Synchronize Feed</h3>
+                    <p id="error-message">Unknown error occurred.</p>
+                    <button id="retry-btn" class="btn btn-secondary">Retry Sync</button>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state hidden" id="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h3>No matching updates found</h3>
+                    <p>Try refining your search query or filter category.</p>
+                </div>
+
+                <!-- Grid/List container -->
+                <div class="notes-grid hidden" id="notes-grid">
+                    <!-- Cards will be generated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Twitter Composer Drawer (Slides in from bottom or right) -->
+    <div class="composer-drawer" id="composer-drawer">
+        <div class="drawer-overlay" id="drawer-overlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <div class="drawer-title">
+                    <svg viewBox="0 0 24 24" width="22" height="22" class="twitter-blue">
+                        <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    <h3>Draft Broadcast Update</h3>
+                </div>
+                <button class="btn-close" id="close-drawer-btn" aria-label="Close Composer">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="drawer-body">
+                <div class="selected-note-preview">
+                    <div class="preview-meta">
+                        <span id="preview-type" class="badge">Feature</span>
+                        <span id="preview-date" class="preview-date">July 09, 2026</span>
+                    </div>
+                    <p id="preview-text" class="preview-text-content">Selected note content will appear here...</p>
+                </div>
+                
+                <div class="tweet-composer-field">
+                    <label for="tweet-textarea">Compose Post Text</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="tweet-textarea" rows="5" maxlength="280" placeholder="What's happening?"></textarea>
+                    </div>
+                    <div class="composer-footer">
+                        <div class="character-counter">
+                            <svg class="progress-ring" width="30" height="30">
+                                <circle class="progress-ring__circle-bg" stroke="#2a2f3d" stroke-width="3" fill="transparent" r="11" cx="15" cy="15"/>
+                                <circle class="progress-ring__circle" stroke="#1da1f2" stroke-width="3" fill="transparent" r="11" cx="15" cy="15"/>
+                            </svg>
+                            <span id="char-count">280</span>
+                        </div>
+                        <button id="tweet-action-btn" class="btn btn-tweet">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                            <span>Share on X</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script File -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
