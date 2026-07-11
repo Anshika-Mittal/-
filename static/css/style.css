@@ -10,6 +10,11 @@
     --text-secondary: #94a3b8;
     --text-muted: #627288;
     
+    /* Theme-specific Elements */
+    --bg-drawer: #0f172a;
+    --bg-input: rgba(0, 0, 0, 0.25);
+    --bg-badge: rgba(255, 255, 255, 0.03);
+    
     /* Category Colors */
     --color-feature: #00f0ff;       /* Electric cyan */
     --color-feature-bg: rgba(0, 240, 255, 0.1);
@@ -42,6 +47,65 @@
     --radius-sm: 8px;
     --radius-md: 16px;
     --radius-lg: 24px;
+}
+
+/* Light Theme Variables Overrides */
+body.light-theme {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: rgba(255, 255, 255, 0.75);
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    --border-color: rgba(15, 23, 42, 0.08);
+    --border-hover: rgba(15, 23, 42, 0.15);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --bg-drawer: #ffffff;
+    --bg-input: rgba(15, 23, 42, 0.04);
+    --bg-badge: rgba(15, 23, 42, 0.03);
+    
+    --color-feature: #0284c7;       /* Readability-enhanced cyan */
+    --color-feature-bg: rgba(2, 132, 199, 0.08);
+    --color-feature-glow: rgba(2, 132, 199, 0.12);
+    
+    --color-change: #7c3aed;        /* Violet */
+    --color-change-bg: rgba(124, 58, 237, 0.08);
+    --color-change-glow: rgba(124, 58, 237, 0.12);
+    
+    --color-deprecation: #db2777;   /* Pinkish red */
+    --color-deprecation-bg: rgba(219, 39, 119, 0.08);
+    --color-deprecation-glow: rgba(219, 39, 119, 0.12);
+    
+    --color-update: #2563eb;        /* Royal blue */
+    --color-update-bg: rgba(37, 99, 235, 0.08);
+    --color-update-glow: rgba(37, 99, 235, 0.12);
+    
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --twitter: #0f172a;
+    
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .glow-orb {
+    opacity: 0.15;
+}
+
+/* Theme Icon Display Controls */
+.theme-icon-sun {
+    display: none;
+}
+.theme-icon-moon {
+    display: block;
+}
+body.light-theme .theme-icon-sun {
+    display: block;
+}
+body.light-theme .theme-icon-moon {
+    display: none;
 }
 
 * {
@@ -770,8 +834,8 @@ body {
     transform: translateX(-50%);
     width: 100%;
     max-width: 600px;
-    background: #0f172a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-drawer);
+    border: 1px solid var(--border-color);
     border-bottom: none;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);

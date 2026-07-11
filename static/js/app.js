@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const refreshBtn = document.getElementById('refresh-btn');
     const exportCsvBtn = document.getElementById('export-csv-btn');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const retryBtn = document.getElementById('retry-btn');
     const searchInput = document.getElementById('search-input');
     const filterBtns = document.querySelectorAll('.filter-btn');
@@ -48,12 +49,35 @@ document.addEventListener('DOMContentLoaded', () => {
         progressCircle.style.strokeDashoffset = circumference;
     }
 
-    // Initialize
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        if (themeToggleBtn) {
+            const themeText = themeToggleBtn.querySelector('.theme-text');
+            if (themeText) themeText.textContent = 'Dark Mode';
+        }
+    }
+
+    // Initialize Notes
     fetchNotes(false);
 
     // Event Listeners
     refreshBtn.addEventListener('click', () => fetchNotes(true));
     exportCsvBtn.addEventListener('click', exportToCSV);
+    
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            const themeText = themeToggleBtn.querySelector('.theme-text');
+            if (themeText) {
+                themeText.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+            }
+            showToast(`Swapped to ${isLight ? 'Light' : 'Dark'} theme`);
+        });
+    }
+    
     retryBtn.addEventListener('click', () => fetchNotes(true));
     
     searchInput.addEventListener('input', (e) => {
