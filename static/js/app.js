@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elements
     const refreshBtn = document.getElementById('refresh-btn');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
     const retryBtn = document.getElementById('retry-btn');
     const searchInput = document.getElementById('search-input');
     const filterBtns = document.querySelectorAll('.filter-btn');
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     refreshBtn.addEventListener('click', () => fetchNotes(true));
+    exportCsvBtn.addEventListener('click', exportToCSV);
     retryBtn.addEventListener('click', () => fetchNotes(true));
     
     searchInput.addEventListener('input', (e) => {
@@ -195,17 +197,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         <path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
                     </svg>
                 </a>
-                <button class="card-tweet-btn" aria-label="Tweet this note" title="Tweet Release Note">
-                    <svg viewBox="0 0 24 24" width="16" height="16">
-                        <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                </button>
+                <div class="card-buttons">
+                    <button class="card-copy-btn" aria-label="Copy note to clipboard" title="Copy to Clipboard" onclick="event.stopPropagation();">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                    </button>
+                    <button class="card-tweet-btn" aria-label="Tweet this note" title="Tweet Release Note" onclick="event.stopPropagation();">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         `;
 
         // Handle Card Selection (select card and open composer)
         card.addEventListener('click', () => {
             selectNote(note);
+        });
+
+        // Handle Copy Button inside Card directly
+        const copyBtn = card.querySelector('.card-copy-btn');
+        copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(note.text)
+                .then(() => showToast("Copied note to clipboard!"))
+                .catch(err => {
+                    console.error('Clipboard copy failed:', err);
+                    showToast("Copy failed");
+                });
         });
 
         // Handle Tweet Button inside Card directly
@@ -355,6 +376,61 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (state === 'grid') {
             notesGrid.classList.remove('hidden');
         }
+    }
+
+    // Export currently filtered items to CSV
+    function exportToCSV() {
+        if (releaseNotes.length === 0) {
+            showToast("No data to export");
+            return;
+        }
+
+        // Get currently filtered items using the same logic as renderNotes
+        const filtered = releaseNotes.filter(note => {
+            const matchesType = currentFilter === 'all' || note.type.toLowerCase() === currentFilter;
+            const matchesSearch = !searchQuery || 
+                note.type.toLowerCase().includes(searchQuery) ||
+                note.date.toLowerCase().includes(searchQuery) ||
+                note.text.toLowerCase().includes(searchQuery);
+            return matchesType && matchesSearch;
+        });
+
+        if (filtered.length === 0) {
+            showToast("No filtered data to export");
+            return;
+        }
+
+        const csvRows = [];
+        // Header row
+        csvRows.push(['Date', 'Type', 'Description', 'Link'].map(val => `"${val.replace(/"/g, '""')}"`).join(','));
+
+        // Content rows
+        filtered.forEach(note => {
+            const row = [
+                note.date,
+                note.type,
+                note.text,
+                note.link
+            ];
+            csvRows.push(row.map(val => `"${val.replace(/"/g, '""')}"`).join(','));
+        });
+
+        // Download Blob
+        const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        
+        // Formulate filename
+        const filterStr = currentFilter !== 'all' ? `_${currentFilter}` : '';
+        const searchStr = searchQuery ? `_search` : '';
+        const dateStr = new Date().toISOString().slice(0, 10);
+        link.setAttribute("download", `bigquery_release_notes_${dateStr}${filterStr}${searchStr}.csv`);
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(`Exported ${filtered.length} notes to CSV`);
     }
 
     // Simple toast helper
